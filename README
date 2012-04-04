@@ -1,0 +1,6 @@
+Experimental assembly lexer in C.
+=================================
+
+Blindly working towards a minimal way of parsing assembly language as per:
+http://0x10c.com/doc/dcpu-16.txt
+... without using regular expressions or parser generators.
