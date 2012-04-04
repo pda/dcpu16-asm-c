@@ -3,4 +3,4 @@
 set -e
 set -x
 
-clang -o main main.c
+clang -o build/main main.c
