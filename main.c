@@ -9,7 +9,8 @@
 // Types.
 
 enum lexeme_types {
-  LX_COMMENT
+  LX_COMMENT,
+  LX_INSTRUCTION
 };
 
 typedef struct {
@@ -27,7 +28,7 @@ void debug(char * message);
 char * load_file(char * path);
 
 void print_lexeme(lexeme_t *);
-void read_lexeme(lexeme_t *, char *);
+void read_lexeme(lexeme_t *, char **);
 void free_lexeme(lexeme_t *);
 
 // ----------------------------------------
@@ -38,11 +39,12 @@ int main(int argc, const char ** argv)
   debug("main");
 
   char * source = load_file(SOURCE_PATH);
+  char * lexable = source;
 
-  for (int i = 0; i < 1; i ++)
+  for (int i = 0; i < 10; i ++)
   {
     lexeme_t * lx = (lexeme_t *)malloc(sizeof(lexeme_t));
-    read_lexeme(lx, source);
+    read_lexeme(lx, &lexable);
     print_lexeme(lx);
     free_lexeme(lx);
   }
@@ -100,24 +102,40 @@ void print_lexeme(lexeme_t * l)
   printf("  value: '%s'\n", l->value);
 }
 
-void read_lexeme(lexeme_t * l, char * source)
+void read_lexeme(lexeme_t * l, char ** source)
 {
   debug("read_lexeme");
 
   int value_size;
-  char * sp = source;
+  char * base = *source;
+  char * ptr;
   char c;
 
-  // TODO: maintain state; pointer.
-  if (*sp == ';')
-  {
-    for (sp++; c != '\n'; c = *(sp++));
-    value_size = sp - source - 1;
+  // Ignore leading whitespace.
+  while ((c = *base) == ' ') base++;
+  ptr = base;
 
+  if (c == ';')
+  {
+    debug("lexing comment");
+    for (ptr++; c != '\n'; c = *(ptr++));
+    value_size = ptr - base - 1;
     l->type = LX_COMMENT;
     l->size = value_size;
     l->value = (char *)malloc(value_size + 1);
-    strlcpy(l->value, source, value_size + 1);
+    strlcpy(l->value, base, value_size + 1);
+    *source = ptr;
+  }
+  else if (c >= 'A' && c <= 'Z')
+  {
+    debug("lexing name");
+    for (; c != ' ' && c != '\t'; c = (*(ptr++)));
+    value_size = ptr - base - 1;
+    l->type = LX_INSTRUCTION;
+    l->size = value_size;
+    l->value = (char *)malloc(value_size + 1);
+    strlcpy(l->value, base, value_size + 1);
+    *source = ptr;
   }
   else
   {
