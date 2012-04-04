@@ -4,13 +4,20 @@
 #include <unistd.h>
 
 #define SOURCE_PATH "fixtures/sample.s"
+#undef DEBUG
 
 // ----------------------------------------
 // Types.
 
 enum lexeme_types {
   LX_COMMENT,
-  LX_INSTRUCTION
+  LX_INSTRUCTION,
+  LX_NUMBER,
+  LX_BRACKET_OPEN,
+  LX_BRACKET_CLOSE,
+  LX_COMMA,
+  LX_LABEL,
+  LX_PLUS
 };
 
 typedef struct {
@@ -28,7 +35,7 @@ void debug(char * message);
 char * load_file(char * path);
 
 void print_lexeme(lexeme_t *);
-void read_lexeme(lexeme_t *, char **);
+int read_lexeme(lexeme_t *, char **);
 void free_lexeme(lexeme_t *);
 
 // ----------------------------------------
@@ -41,15 +48,17 @@ int main(int argc, const char ** argv)
   char * source = load_file(SOURCE_PATH);
   char * lexable = source;
 
-  for (int i = 0; i < 10; i ++)
+  for (int i = 0; i < 200; i ++)
   {
     lexeme_t * lx = (lexeme_t *)malloc(sizeof(lexeme_t));
-    read_lexeme(lx, &lexable);
+    if (!read_lexeme(lx, &lexable)) break;
     print_lexeme(lx);
     free_lexeme(lx);
   }
 
   free(source);
+
+  debug("finished");
   exit(0);
 }
 
@@ -64,7 +73,9 @@ void crash(char * message)
 
 void debug(char * message)
 {
+#ifdef DEBUG
   printf("== %s ==\n", message);
+#endif
 }
 
 char * load_file(char * path)
@@ -96,51 +107,88 @@ char * load_file(char * path)
 void print_lexeme(lexeme_t * l)
 {
   debug("print_lexeme");
-  printf("Lexeme:\n");
-  printf("  type: %u\n", l->type);
-  printf("  size: %u\n", l->size);
-  printf("  value: '%s'\n", l->value);
+  printf("[t:%u s:%03u]    %s\n", l->type, l->size, l->value);
 }
 
-void read_lexeme(lexeme_t * l, char ** source)
+int read_lexeme(lexeme_t * l, char ** source)
 {
   debug("read_lexeme");
 
-  int value_size;
+  int type, value_size;
   char * base = *source;
   char * ptr;
   char c;
 
   // Ignore leading whitespace.
-  while ((c = *base) == ' ') base++;
+  while ((c = *base) && (c == ' ' || c == '\n')) base++;
   ptr = base;
 
   if (c == ';')
   {
     debug("lexing comment");
-    for (ptr++; c != '\n'; c = *(ptr++));
-    value_size = ptr - base - 1;
-    l->type = LX_COMMENT;
-    l->size = value_size;
-    l->value = (char *)malloc(value_size + 1);
-    strlcpy(l->value, base, value_size + 1);
-    *source = ptr;
+    for (ptr++; c != '\n'; c = *(++ptr));
+    value_size = ptr - base;
+    type = LX_COMMENT;
   }
-  else if (c >= 'A' && c <= 'Z')
+  else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
   {
     debug("lexing name");
-    for (; c != ' ' && c != '\t'; c = (*(ptr++)));
-    value_size = ptr - base - 1;
-    l->type = LX_INSTRUCTION;
-    l->size = value_size;
-    l->value = (char *)malloc(value_size + 1);
-    strlcpy(l->value, base, value_size + 1);
-    *source = ptr;
+    for (; (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); c = (*(++ptr)));
+    value_size = ptr - base;
+    type = LX_INSTRUCTION;
+  }
+  else if (c == ':')
+  {
+    debug("lexing label");
+    for (c = *(++ptr); (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); c = (*(++ptr)));
+    value_size = ptr - base;
+    type = LX_LABEL;
+  }
+  else if (c >= '0' && c <= '9')
+  {
+    debug("lexing number");
+    for (; (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || c == 'x'; c = (*(++ptr)));
+    value_size = ptr - base;
+    type = LX_NUMBER;
+  }
+  else if (c == '[' || c == ']')
+  {
+    debug("lexing bracket");
+    ptr++;
+    value_size = 1;
+    type = c == '[' ? LX_BRACKET_OPEN : LX_BRACKET_CLOSE;
+  }
+  else if (c == ',')
+  {
+    debug("lexing comma");
+    ptr++;
+    value_size = 1;
+    type = LX_COMMA;
+  }
+  else if (c == '+')
+  {
+    debug("lexing plus");
+    ptr++;
+    value_size = 1;
+    type = LX_PLUS;
+  }
+  else if (c == 0)
+  {
+    return 0;
   }
   else
   {
+    printf("c: '%c' (0x%02x)\n", c, (int)c);
     crash("unhandled lexeme");
   }
+
+  l->type = type;
+  l->size = value_size;
+  l->value = (char *)malloc(value_size + 1);
+  strlcpy(l->value, base, value_size + 1);
+  *source = ptr;
+
+  return 1;
 }
 
 void free_lexeme(lexeme_t * l)
