@@ -7,8 +7,9 @@
 
 void print_lexeme(lexeme_t * l)
 {
-  debug("print_lexeme");
-  printf("[t:%u s:%03u]    %s\n", l->type, l->size, l->value);
+  char label[32];
+  snprintf(label, 32, "%s[%u]", lexeme_type_name(l), l->size);
+  printf("%12s %s\n", label, l->value);
 }
 
 void free_lexeme(lexeme_t * l)
