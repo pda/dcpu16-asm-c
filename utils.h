@@ -6,9 +6,4 @@
  */
 void crash(char * message);
 
-/**
- * Prints debug message to STDOUT.
- */
-void debug(char * message);
-
 #endif
