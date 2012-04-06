@@ -17,14 +17,19 @@ int read_token(token_t * t, char ** source)
   char * ptr;
   char c;
 
-  // Ignore leading whitespace.
-  while ((c = *base) && (c == ' ' || c == '\n')) base++;
+  // Ignore spaces.
+  while ((c = *base) && (c == ' ')) base++;
   ptr = base;
 
   if (c == ';')
   {
     while (c != '\n') c = *(++ptr);
     type = T_COMMENT;
+  }
+  else if (c == '\n')
+  {
+    ptr++;
+    type = T_NEWLINE;
   }
   else if (is_name_char(c))
   {

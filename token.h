@@ -6,6 +6,7 @@
 
 enum token_types {
   T_COMMENT,
+  T_NEWLINE,
   T_NAME,
   T_INT_DEC,
   T_INT_HEX,
