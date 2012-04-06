@@ -34,4 +34,9 @@ void print_lexeme(lexeme_t *);
  */
 void free_lexeme(lexeme_t *);
 
+/**
+ * The name of the lexeme type, e.g. "LX_COMMENT".
+ */
+const char * lexeme_type_name(lexeme_t *);
+
 #endif
