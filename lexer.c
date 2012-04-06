@@ -24,43 +24,36 @@ int read_lexeme(lexeme_t * l, char ** source)
   if (c == ';')
   {
     for (ptr++; c != '\n'; c = *(++ptr));
-    value_size = ptr - base;
     type = LX_COMMENT;
   }
   else if (is_name_char(c))
   {
     for (; is_name_char(c); c = (*(++ptr)));
-    value_size = ptr - base;
     type = LX_NAME;
   }
   else if (c == ':')
   {
     for (c = *(++ptr); is_name_char(c); c = (*(++ptr)));
-    value_size = ptr - base;
     type = LX_LABEL;
   }
   else if (is_digit_char(c))
   {
     for (; is_hex_char(c); c = (*(++ptr)));
-    value_size = ptr - base;
     type = LX_NUMBER;
   }
   else if (c == '[' || c == ']')
   {
     ptr++;
-    value_size = 1;
     type = c == '[' ? LX_BRACKET_L : LX_BRACKET_R;
   }
   else if (c == ',')
   {
     ptr++;
-    value_size = 1;
     type = LX_COMMA;
   }
   else if (c == '+')
   {
     ptr++;
-    value_size = 1;
     type = LX_PLUS;
   }
   else if (c == 0)
@@ -74,7 +67,7 @@ int read_lexeme(lexeme_t * l, char ** source)
   }
 
   l->type = type;
-  l->size = value_size;
+  l->size = value_size = ptr - base;
   l->value = (char *)malloc(value_size + 1);
   strlcpy(l->value, base, value_size + 1);
   *source = ptr;
