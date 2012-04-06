@@ -67,7 +67,7 @@ int read_lexeme(lexeme_t * l, char ** source)
     debug("lexing name");
     for (; (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); c = (*(++ptr)));
     value_size = ptr - base;
-    type = LX_INSTRUCTION;
+    type = LX_NAME;
   }
   else if (c == ':')
   {
@@ -88,7 +88,7 @@ int read_lexeme(lexeme_t * l, char ** source)
     debug("lexing bracket");
     ptr++;
     value_size = 1;
-    type = c == '[' ? LX_BRACKET_OPEN : LX_BRACKET_CLOSE;
+    type = c == '[' ? LX_BRACKET_L : LX_BRACKET_R;
   }
   else if (c == ',')
   {
