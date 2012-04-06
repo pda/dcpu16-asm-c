@@ -10,7 +10,7 @@ int is_name_char(char);
 int is_digit_char(char);
 int is_hex_char(char);
 
-int read_lexeme(lexeme_t * l, char ** source)
+int read_token(token_t * t, char ** source)
 {
   int type, value_size;
   char * base = *source;
@@ -24,45 +24,45 @@ int read_lexeme(lexeme_t * l, char ** source)
   if (c == ';')
   {
     for (ptr++; c != '\n'; c = *(++ptr));
-    type = LX_COMMENT;
+    type = T_COMMENT;
   }
   else if (is_name_char(c))
   {
     for (; is_name_char(c); c = (*(++ptr)));
-    type = LX_NAME;
+    type = T_NAME;
   }
   else if (c == ':')
   {
     for (c = *(++ptr); is_name_char(c); c = (*(++ptr)));
-    type = LX_LABEL;
+    type = T_LABEL;
   }
   else if (is_digit_char(c))
   {
     if (*(base + 1) == 'x') // look-ahead
     {
       for (; is_hex_char(c); c = (*(++ptr)));
-      type = LX_INT_HEX;
+      type = T_INT_HEX;
     }
     else
     {
       for (; is_digit_char(c); c = (*(++ptr)));
-      type = LX_INT_DEC;
+      type = T_INT_DEC;
     }
   }
   else if (c == '[' || c == ']')
   {
     ptr++;
-    type = c == '[' ? LX_BRACKET_L : LX_BRACKET_R;
+    type = c == '[' ? T_BRACKET_L : T_BRACKET_R;
   }
   else if (c == ',')
   {
     ptr++;
-    type = LX_COMMA;
+    type = T_COMMA;
   }
   else if (c == '+')
   {
     ptr++;
-    type = LX_PLUS;
+    type = T_PLUS;
   }
   else if (c == 0)
   {
@@ -71,13 +71,13 @@ int read_lexeme(lexeme_t * l, char ** source)
   else
   {
     printf("c: '%c' (0x%02x)\n", c, (int)c);
-    crash("unhandled lexeme");
+    crash("unhandled token");
   }
 
-  l->type = type;
-  l->size = value_size = ptr - base;
-  l->value = (char *)malloc(value_size + 1);
-  strlcpy(l->value, base, value_size + 1);
+  t->type = type;
+  t->size = value_size = ptr - base;
+  t->value = (char *)malloc(value_size + 1);
+  strlcpy(t->value, base, value_size + 1);
   *source = ptr;
 
   return 1;

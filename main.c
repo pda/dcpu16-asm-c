@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "file.h"
-#include "lexeme.h"
+#include "token.h"
 #include "lexer.h"
 #include "utils.h"
 
@@ -14,10 +14,10 @@ int main(int argc, const char ** argv)
 
   for (int i = 0; i < 200; i ++)
   {
-    lexeme_t * lx = (lexeme_t *)malloc(sizeof(lexeme_t));
-    if (!read_lexeme(lx, &lexable)) break;
-    print_lexeme(lx);
-    free_lexeme(lx);
+    token_t * t = (token_t *)malloc(sizeof(token_t));
+    if (!read_token(t, &lexable)) break;
+    print_token(t);
+    free_token(t);
   }
 
   free(source);

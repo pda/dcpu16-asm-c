@@ -1,6 +1,6 @@
 CC=clang
 
-main: file.o lexeme.o lexer.o utils.o main.o
+main: file.o token.o lexer.o utils.o main.o
 	clang -o main *.o
 
 clean:

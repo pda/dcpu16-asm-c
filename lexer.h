@@ -1,12 +1,12 @@
 #ifndef INCLUDED_LEXER_H
 #define INCLUDED_LEXER_H
 
-#include "lexeme.h"
+#include "token.h"
 
 /**
- * Read the next lexeme from the buffer.
+ * Read the next token from the buffer.
  * Returns 1 on success, 0 at end of buffer.
  */
-int read_lexeme(lexeme_t *, char **);
+int read_token(token_t *, char **);
 
 #endif
