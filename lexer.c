@@ -23,29 +23,30 @@ int read_token(token_t * t, char ** source)
 
   if (c == ';')
   {
-    for (ptr++; c != '\n'; c = *(++ptr));
+    while (c != '\n') c = *(++ptr);
     type = T_COMMENT;
   }
   else if (is_name_char(c))
   {
-    for (; is_name_char(c); c = (*(++ptr)));
+    while (is_name_char(c)) c = *(++ptr);
     type = T_NAME;
   }
   else if (c == ':')
   {
-    for (c = *(++ptr); is_name_char(c); c = (*(++ptr)));
+    c = *(ptr++);
+    while (is_name_char(c)) c = *(++ptr);
     type = T_LABEL;
   }
   else if (is_digit_char(c))
   {
     if (*(base + 1) == 'x') // look-ahead
     {
-      for (; is_hex_char(c); c = (*(++ptr)));
+      while (is_hex_char(c)) c = *(++ptr);
       type = T_INT_HEX;
     }
     else
     {
-      for (; is_digit_char(c); c = (*(++ptr)));
+      while (is_digit_char(c)) c = *(++ptr);
       type = T_INT_DEC;
     }
   }
