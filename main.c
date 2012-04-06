@@ -4,37 +4,16 @@
 #include <unistd.h>
 
 #include "file.h"
+#include "lexeme.h"
 #include "utils.h"
 
 #define SOURCE_PATH "fixtures/sample.s"
 #undef DEBUG
 
 // ----------------------------------------
-// Types.
-
-enum lexeme_types {
-  LX_COMMENT,
-  LX_INSTRUCTION,
-  LX_NUMBER,
-  LX_BRACKET_OPEN,
-  LX_BRACKET_CLOSE,
-  LX_COMMA,
-  LX_LABEL,
-  LX_PLUS
-};
-
-typedef struct {
-  enum lexeme_types type;
-  int size;
-  char * value;
-} lexeme_t;
-
-// ----------------------------------------
 // Function headers.
 
-void print_lexeme(lexeme_t *);
 int read_lexeme(lexeme_t *, char **);
-void free_lexeme(lexeme_t *);
 
 // ----------------------------------------
 // Main.
@@ -62,12 +41,6 @@ int main(int argc, const char ** argv)
 
 // ----------------------------------------
 // Functions.
-
-void print_lexeme(lexeme_t * l)
-{
-  debug("print_lexeme");
-  printf("[t:%u s:%03u]    %s\n", l->type, l->size, l->value);
-}
 
 int read_lexeme(lexeme_t * l, char ** source)
 {
@@ -148,10 +121,4 @@ int read_lexeme(lexeme_t * l, char ** source)
   *source = ptr;
 
   return 1;
-}
-
-void free_lexeme(lexeme_t * l)
-{
-  free(l->value);
-  free(l);
 }
