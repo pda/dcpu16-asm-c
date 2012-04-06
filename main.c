@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "utils.h"
+
 #define SOURCE_PATH "fixtures/sample.s"
 #undef DEBUG
 
@@ -28,9 +30,6 @@ typedef struct {
 
 // ----------------------------------------
 // Function headers.
-
-void crash(char * message);
-void debug(char * message);
 
 char * load_file(char * path);
 
@@ -64,19 +63,6 @@ int main(int argc, const char ** argv)
 
 // ----------------------------------------
 // Functions.
-
-void crash(char * message)
-{
-  printf("!! Failed: %s !!\n", message);
-  exit(EXIT_FAILURE);
-}
-
-void debug(char * message)
-{
-#ifdef DEBUG
-  printf("== %s ==\n", message);
-#endif
-}
 
 char * load_file(char * path)
 {

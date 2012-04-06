@@ -1,7 +1,7 @@
 CC=clang
 
-main: main.c
-	clang -o main main.c
+main: utils.o main.c
+	clang -o main *.o main.c
 
 clean:
-	rm -f main
+	rm -f *.o main
