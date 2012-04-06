@@ -6,6 +6,10 @@
 
 #include "lexer.h"
 
+int is_name_char(char);
+int is_digit_char(char);
+int is_hex_char(char);
+
 int read_lexeme(lexeme_t * l, char ** source)
 {
   int type, value_size;
@@ -23,21 +27,21 @@ int read_lexeme(lexeme_t * l, char ** source)
     value_size = ptr - base;
     type = LX_COMMENT;
   }
-  else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+  else if (is_name_char(c))
   {
-    for (; (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); c = (*(++ptr)));
+    for (; is_name_char(c); c = (*(++ptr)));
     value_size = ptr - base;
     type = LX_NAME;
   }
   else if (c == ':')
   {
-    for (c = *(++ptr); (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); c = (*(++ptr)));
+    for (c = *(++ptr); is_name_char(c); c = (*(++ptr)));
     value_size = ptr - base;
     type = LX_LABEL;
   }
-  else if (c >= '0' && c <= '9')
+  else if (is_digit_char(c))
   {
-    for (; (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || c == 'x'; c = (*(++ptr)));
+    for (; is_hex_char(c); c = (*(++ptr)));
     value_size = ptr - base;
     type = LX_NUMBER;
   }
@@ -76,4 +80,19 @@ int read_lexeme(lexeme_t * l, char ** source)
   *source = ptr;
 
   return 1;
+}
+
+int is_name_char(char c)
+{
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+int is_digit_char(char c)
+{
+  return c >= '0' && c <= '9';
+}
+
+int is_hex_char(char c)
+{
+  return is_digit_char(c) || (c >= 'a' && c <= 'f') || c == 'x';
 }
