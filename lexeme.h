@@ -7,7 +7,8 @@
 enum lexeme_types {
   LX_COMMENT,
   LX_NAME,
-  LX_NUMBER,
+  LX_INT_DEC,
+  LX_INT_HEX,
   LX_BRACKET_L,
   LX_BRACKET_R,
   LX_COMMA,

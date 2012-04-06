@@ -38,8 +38,16 @@ int read_lexeme(lexeme_t * l, char ** source)
   }
   else if (is_digit_char(c))
   {
-    for (; is_hex_char(c); c = (*(++ptr)));
-    type = LX_NUMBER;
+    if (*(base + 1) == 'x') // look-ahead
+    {
+      for (; is_hex_char(c); c = (*(++ptr)));
+      type = LX_INT_HEX;
+    }
+    else
+    {
+      for (; is_digit_char(c); c = (*(++ptr)));
+      type = LX_INT_DEC;
+    }
   }
   else if (c == '[' || c == ']')
   {

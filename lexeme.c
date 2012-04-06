@@ -23,7 +23,8 @@ const char * lexeme_type_name(lexeme_t * l)
   const char * names[] = {
     "COMMENT",
     "NAME",
-    "NUMBER",
+    "INT_DEC",
+    "INT_HEX",
     "BRACKET_L",
     "BRACKET_R",
     "COMMA",
