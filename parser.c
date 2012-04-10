@@ -8,11 +8,12 @@
 void parse(char * source)
 {
   char * lexable = source;
+  token_t * t;
 
   while (1)
   {
-    token_t * t = (token_t *)malloc(sizeof(token_t));
-    if (!read_token(t, &lexable)) break;
+    t = read_token(&lexable);
+    if (!t) break;
     print_token(t);
     free_token(t);
   }

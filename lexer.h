@@ -5,8 +5,8 @@
 
 /**
  * Read the next token from the buffer.
- * Returns 1 on success, 0 at end of buffer.
+ * Returns null pointer when finished.
  */
-int read_token(token_t *, char **);
+token_t * read_token(char **);
 
 #endif

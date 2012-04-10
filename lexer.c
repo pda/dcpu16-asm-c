@@ -10,8 +10,9 @@ int is_name_char(char);
 int is_digit_char(char);
 int is_hex_char(char);
 
-int read_token(token_t * t, char ** source)
+token_t * read_token(char ** source)
 {
+  token_t * t;
   int type, value_size;
   char * base = *source;
   char * ptr;
@@ -72,7 +73,7 @@ int read_token(token_t * t, char ** source)
   }
   else if (c == 0)
   {
-    return 0;
+    return NULL;
   }
   else
   {
@@ -80,13 +81,14 @@ int read_token(token_t * t, char ** source)
     crash("unhandled token");
   }
 
+  t = (token_t *)malloc(sizeof(token_t));
   t->type = type;
   t->size = value_size = ptr - base;
   t->value = (char *)malloc(value_size + 1);
   strlcpy(t->value, base, value_size + 1);
   *source = ptr;
 
-  return 1;
+  return t;
 }
 
 int is_name_char(char c)
