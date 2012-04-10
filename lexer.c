@@ -10,11 +10,11 @@ int is_name_char(char);
 int is_digit_char(char);
 int is_hex_char(char);
 
-token_t * read_token(char ** source)
+token_t * read_token(lexer_state * state)
 {
   token_t * t;
   int type, value_size;
-  char * left = *source;
+  char * left = state->ptr;
   char * right;
   char c;
 
@@ -87,9 +87,14 @@ token_t * read_token(char ** source)
   t->value = (char *)malloc(value_size + 1);
   strlcpy(t->value, left, value_size + 1);
 
-  *source = right;
+  state->ptr = right;
 
   return t;
+}
+
+void lexer_init(lexer_state * state, char * source)
+{
+  state->ptr = source;
 }
 
 int is_name_char(char c)

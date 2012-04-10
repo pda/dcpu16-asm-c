@@ -7,12 +7,14 @@
 
 void parse(char * source)
 {
-  char * lexable = source;
+  lexer_state state;
   token_t * t;
+
+  lexer_init(&state, source);
 
   while (1)
   {
-    t = read_token(&lexable);
+    t = read_token(&state);
     if (!t) break;
     print_token(t);
     free_token(t);
