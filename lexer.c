@@ -14,61 +14,61 @@ token_t * read_token(char ** source)
 {
   token_t * t;
   int type, value_size;
-  char * base = *source;
-  char * ptr;
+  char * left = *source;
+  char * right;
   char c;
 
   // Ignore spaces.
-  while ((c = *base) && (c == ' ')) base++;
-  ptr = base;
+  while ((c = *left) && (c == ' ')) left++;
+  right = left;
 
   if (c == ';')
   {
-    while (c != '\n') c = *(++ptr);
+    while (c != '\n') c = *(++right);
     type = T_COMMENT;
   }
   else if (c == '\n')
   {
-    ptr++;
+    right++;
     type = T_NEWLINE;
   }
   else if (is_name_char(c))
   {
-    while (is_name_char(c)) c = *(++ptr);
+    while (is_name_char(c)) c = *(++right);
     type = T_NAME;
   }
   else if (c == ':')
   {
-    c = *(ptr++);
-    while (is_name_char(c)) c = *(++ptr);
+    c = *(right++);
+    while (is_name_char(c)) c = *(++right);
     type = T_LABEL;
   }
   else if (is_digit_char(c))
   {
-    if (*(base + 1) == 'x') // look-ahead
+    if (*(left + 1) == 'x') // look-ahead
     {
-      while (is_hex_char(c)) c = *(++ptr);
+      while (is_hex_char(c)) c = *(++right);
       type = T_INT_HEX;
     }
     else
     {
-      while (is_digit_char(c)) c = *(++ptr);
+      while (is_digit_char(c)) c = *(++right);
       type = T_INT_DEC;
     }
   }
   else if (c == '[' || c == ']')
   {
-    ptr++;
+    right++;
     type = c == '[' ? T_BRACKET_L : T_BRACKET_R;
   }
   else if (c == ',')
   {
-    ptr++;
+    right++;
     type = T_COMMA;
   }
   else if (c == '+')
   {
-    ptr++;
+    right++;
     type = T_PLUS;
   }
   else if (c == 0)
@@ -83,10 +83,11 @@ token_t * read_token(char ** source)
 
   t = (token_t *)malloc(sizeof(token_t));
   t->type = type;
-  t->size = value_size = ptr - base;
+  t->size = value_size = right - left;
   t->value = (char *)malloc(value_size + 1);
-  strlcpy(t->value, base, value_size + 1);
-  *source = ptr;
+  strlcpy(t->value, left, value_size + 1);
+
+  *source = right;
 
   return t;
 }
