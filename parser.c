@@ -8,15 +8,19 @@
 void parse(char * source)
 {
   lexer_state state;
-  token_t * t;
-
   lexer_init(&state, source);
 
-  while (1)
-  {
-    t = read_token(&state);
-    if (!t) break;
+  token_t * t;
+
+  print_token(next_token(&state));
+  peek_token(&state, 3);
+  peek_token(&state, 2);
+
+  while ((t = next_token(&state)))
     print_token(t);
-    free_token(t);
-  }
+
+  // TODO: free() the tokens!
+  // including the state->token_buffer
+
+  return;
 }

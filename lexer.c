@@ -92,9 +92,54 @@ token_t * read_token(lexer_state * state)
   return t;
 }
 
+token_t * next_token(lexer_state * state)
+{
+  if (state->ahead > 0)
+  {
+    state->ahead--;
+    state->token_buffer = state->token_buffer->next;
+    return state->token_buffer->token;
+  }
+  else
+  {
+    return read_token(state);
+  }
+}
+
+token_t * peek_token(lexer_state * state, int offset)
+{
+  if (offset > TOKEN_BUFFER_SIZE)
+    crash("offset > TOKEN_BUFFER_SIZE");
+
+  if (offset <= 0)
+    crash("offset <= 0");
+
+  int ahead = state->ahead;
+  token_list * b = state->token_buffer;
+
+  for (int i = 0; i < offset; i++)
+  {
+    b = b->next;
+    if (i >= ahead)
+    {
+      b->token = read_token(state);
+      state->ahead++;
+    }
+  }
+
+  return b->token;
+}
+
 void lexer_init(lexer_state * state, char * source)
 {
+  // Circular linked list: 0 -> 1, 1 -> 2, 2 -> 3, 3 -> 0
+  token_list * b = (token_list *)malloc(TOKEN_BUFFER_SIZE * sizeof(token_list));
+  for (int i = 0; i < TOKEN_BUFFER_SIZE; i++)
+    (b + i)->next = (b + ((i + 1) % TOKEN_BUFFER_SIZE));
+
   state->ptr = source;
+  state->token_buffer = b;
+  state->ahead = 0;
 }
 
 int is_name_char(char c)
