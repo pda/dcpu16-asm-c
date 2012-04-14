@@ -78,7 +78,7 @@ token_t * read_token(lexer_state * state)
   else
   {
     printf("c: '%c' (0x%02x)\n", c, (int)c);
-    crash("unhandled token");
+    CRASH("unhandled token");
   }
 
   t = (token_t *)malloc(sizeof(token_t));
@@ -109,10 +109,10 @@ token_t * next_token(lexer_state * state)
 token_t * peek_token(lexer_state * state, int offset)
 {
   if (offset > TOKEN_BUFFER_SIZE)
-    crash("offset > TOKEN_BUFFER_SIZE");
+    CRASH("offset > TOKEN_BUFFER_SIZE");
 
   if (offset <= 0)
-    crash("offset <= 0");
+    CRASH("offset <= 0");
 
   int ahead = state->ahead;
   token_list * b = state->token_buffer;

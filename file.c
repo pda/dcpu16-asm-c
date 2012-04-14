@@ -11,20 +11,20 @@ char * load_file(char * path)
   char * buffer;
 
   // open file
-  if (!(fd = fopen(path, "r"))) crash("open file");
+  if (!(fd = fopen(path, "r"))) CRASH("open file");
 
   // read size
-  if (fseek(fd, 0, SEEK_END) == -1) crash("seek to end");
+  if (fseek(fd, 0, SEEK_END) == -1) CRASH("seek to end");
   size = ftell(fd);
-  if (fseek(fd, 0, SEEK_SET) == -1) crash("seek to start");
+  if (fseek(fd, 0, SEEK_SET) == -1) CRASH("seek to start");
 
   // allocate memory
-  if (!(buffer = (char *)malloc(size))) crash("malloc");
+  if (!(buffer = (char *)malloc(size))) CRASH("malloc");
 
   // read info buffer
-  if (fread(buffer, 1, (size_t)size, fd) != size) crash("fread");
+  if (fread(buffer, 1, (size_t)size, fd) != size) CRASH("fread");
 
-  if (fclose(fd) == -1) crash("fclose");
+  if (fclose(fd) == -1) CRASH("fclose");
 
   return(buffer);
 }

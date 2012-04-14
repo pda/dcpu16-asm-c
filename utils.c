@@ -3,8 +3,8 @@
 
 #include "utils.h"
 
-void crash(char * message)
+void crash(char * message, char * file, int line)
 {
-  printf("!! Failed: %s !!\n", message);
+  fprintf(stderr, "CRASH at %s:%d: %s\n", file, line, message);
   exit(EXIT_FAILURE);
 }
