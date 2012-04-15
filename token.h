@@ -4,7 +4,7 @@
 // ----------------------------------------
 // Types.
 
-enum token_types {
+enum token_type {
   T_COMMENT,
   T_NEWLINE,
   T_NAME,
@@ -18,7 +18,7 @@ enum token_types {
 };
 
 typedef struct {
-  enum token_types type;
+  enum token_type type;
   int size;
   char * value;
 } token_t;

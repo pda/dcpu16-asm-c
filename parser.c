@@ -4,6 +4,7 @@
 #include <strings.h>
 
 #include "lexer.h"
+#include "operand.h"
 #include "statement.h"
 #include "token.h"
 #include "utils.h"
@@ -17,6 +18,7 @@ static void parse_mnemonic(lexer_state *, statement_t *);
 static void parse_operands(lexer_state *, statement_t *);
 static void parse_operand(lexer_state *, statement_t *, int index);
 static uint8_t parser_opcode_for_mnemonic(char *);
+static enum operand_type operand_type_for_name(const char *);
 
 void parse(char * source)
 {
@@ -86,27 +88,95 @@ static void parse_operands(lexer_state * state, statement_t * s)
   parse_operand(state, s, 0);
   if (next_token(state)->type == T_COMMA)
     parse_operand(state, s, 1);
+  else
+    s->operand[1].type = O_NULL;
 }
 
 static void parse_operand(lexer_state * state, statement_t * s, int index)
 {
-  token_t * t;
-  t = next_token(state);
+  operand_t * o = &s->operand[index];
+  token_t * t = next_token(state);
+  const char * v = t->value;
 
   switch (t->type)
   {
     case T_BRACKET_L:
-      s->operand[index] = (char *)malloc(6); // TODO: free()
-      if (!s->operand[index]) CRASH("malloc operand[index]");
-      memcpy(s->operand[index], "[???]", 6);
-      while (next_token(state)->type != T_BRACKET_R);
+      t = next_token(state);
+      switch (t->type)
+      {
+        case T_NAME:
+          // TODO: assuming register; could this be a label?
+          if (next_token(state)->type != T_BRACKET_R)
+            CRASH("expected T_BRACKET_R");
+          o->type = O_INDIRECT_REG;
+          break;
+        case T_INT_HEX:
+          o->next_word = (uint16_t)strtoul(t->value, 0, 16);
+          t = next_token(state);
+          switch (t->type)
+          {
+            case T_BRACKET_R:
+              o->type = O_INDIRECT_NW;
+              break;
+            case T_PLUS:
+              t = next_token(state);
+              if (t->type != T_NAME) CRASH("expected T_NAME");
+              o->type = O_INDIRECT_NW_OFFSET;
+              switch (*t->value)
+              {
+                case 'A': o->reg = REG_A; break;
+                case 'B': o->reg = REG_B; break;
+                case 'C': o->reg = REG_C; break;
+                case 'X': o->reg = REG_X; break;
+                case 'Y': o->reg = REG_Y; break;
+                case 'Z': o->reg = REG_Z; break;
+                case 'I': o->reg = REG_I; break;
+                case 'J': o->reg = REG_J; break;
+                default: CRASH("Invalid register."); break;
+              }
+              if (next_token(state)->type != T_BRACKET_R)
+                CRASH("expected T_BRACKET_R");
+              break;
+            default:
+              CRASH("expected T_BRACKET_R or T_PLUS");
+              break;
+          }
+          break;
+        default:
+          CRASH("default");
+      }
       break;
     case T_NAME:
+      o->type = operand_type_for_name(v);
+      if (o->type == O_REG)
+      {
+        switch (*v)
+        {
+          case 'A': o->reg = REG_A; break;
+          case 'B': o->reg = REG_B; break;
+          case 'C': o->reg = REG_C; break;
+          case 'X': o->reg = REG_X; break;
+          case 'Y': o->reg = REG_Y; break;
+          case 'Z': o->reg = REG_Z; break;
+          case 'I': o->reg = REG_I; break;
+          case 'J': o->reg = REG_J; break;
+          default: CRASH("Invalid register."); break;
+        }
+      }
+      if (o->type == O_LITERAL)
+      {
+        o->label = (char *)malloc(strlen(v) + 1);
+        if (!o->label) CRASH("malloc o->label");
+        strcpy(o->label, v);
+      }
+      break;
     case T_INT_HEX:
+      o->type = O_NW;
+      o->next_word = (uint16_t)strtoul(t->value, 0, 16);
+      break;
     case T_INT_DEC:
-      s->operand[index] = (char *)malloc(t->size); // TODO: free()
-      if (!s->operand[index]) CRASH("malloc operand[index]");
-      memcpy(s->operand[index], t->value, t->size);
+      o->type = O_NW;
+      o->next_word = (uint16_t)strtoul(t->value, 0, 10);
       break;
     default:
       print_token(t);
@@ -140,4 +210,29 @@ static uint8_t parser_opcode_for_mnemonic(char * m)
 
   puts(m); CRASH("parser_opcode_for_mnemonic");
   return -1;
+}
+
+static enum operand_type operand_type_for_name(const char * n)
+{
+  char c = *n;
+  size_t l = strlen(n);
+
+  // general registers
+  if (l == 1 && (
+      c == 'A' || c == 'B' || c == 'C' ||
+      c == 'X' || c == 'Y' || c == 'Z' ||
+      c == 'I' || c == 'J')) return O_REG;
+
+  // special registers
+  if (strcmp(n, "PC") == 0) return O_PC;
+  if (strcmp(n, "SP") == 0) return O_SP;
+  if (strcmp(n, "O") == 0) return O_O;
+
+  // stack operations
+  if (strcmp(n, "POP") == 0) return O_POP;
+  if (strcmp(n, "PEEK") == 0) return O_PEEK;
+  if (strcmp(n, "PUSH") == 0) return O_PUSH;
+
+  // label
+  return O_LITERAL;
 }

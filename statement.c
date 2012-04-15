@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #include "statement.h"
+#include "operand.h"
 
 statement_t * statement_new()
 {
@@ -13,8 +14,8 @@ statement_t * statement_new()
 
   s->label = 0;
   s->mnemonic[0] = 0;
-  s->operand[0] = 0;
-  s->operand[1] = 0;
+  operand_init(&s->operand[0]);
+  operand_init(&s->operand[1]);
 
   return s;
 }
@@ -22,32 +23,28 @@ statement_t * statement_new()
 void statement_free(statement_t * s)
 {
   free(s->label);
-  free(s->operand[0]);
-  free(s->operand[1]);
+  operand_free(&s->operand[0]);
+  operand_free(&s->operand[1]);
   free(s);
 }
 
 void print_statement(statement_t * s)
 {
   const char * label = s->label ? s->label : "";
-  char o[2][32];
-  char * writer;
 
-  bzero(o[0], 32);
-  bzero(o[1], 32);
+  char * o[2];
 
-  writer = stpncpy(o[0], s->operand[0], 30);
-  if (s->operand[1]) *(writer++) = ',';
-
-  if (s->operand[1])
-    stpncpy(o[1], s->operand[1], 31);
+  for (int i = 0; i < 2; i++)
+    o[i] = operand_to_s(&s->operand[i]);
 
   printf(
-    "%-16s %-3s  %-12s %-12s ; 0x%02X\n",
+    "%-10s %-3s %-10s %-10s\n",
     label,
     s->mnemonic,
     o[0],
-    o[1],
-    s->opcode
+    o[1]
   );
+
+  for (int i = 0; i < 2; i++)
+    free(o[i]);
 }

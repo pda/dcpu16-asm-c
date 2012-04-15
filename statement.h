@@ -3,11 +3,13 @@
 
 #include <stdint.h>
 
+#include "operand.h"
+
 typedef struct {
   char * label;
   char mnemonic[4];
   uint8_t opcode;
-  char * operand[2];
+  operand_t operand[2];
 } statement_t;
 
 /**

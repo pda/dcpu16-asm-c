@@ -29,6 +29,8 @@ void free_token(token_t * t)
 
 const char * token_type_name(token_t * t)
 {
+  // TODO: isn't this completely invalid?
+  // returning a pointer to inactive stack.
   const char * names[] = {
     "COMMENT",
     "NEWLINE",
