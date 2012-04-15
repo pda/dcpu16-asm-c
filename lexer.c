@@ -39,7 +39,7 @@ token_t * read_token(lexer_state * state)
   }
   else if (c == ':')
   {
-    c = *(right++);
+    c = *(++right);
     while (is_name_char(c)) c = *(++right);
     type = T_LABEL;
   }
