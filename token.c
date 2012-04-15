@@ -7,6 +7,12 @@
 
 void print_token(token_t * t)
 {
+  if (t == 0)
+  {
+    printf("(null token)\n");
+    return;
+  }
+
   char label[32];
   snprintf(label, 32, "%s[%u]", token_type_name(t), t->size);
   if (t->type == T_NEWLINE)
