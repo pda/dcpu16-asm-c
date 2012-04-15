@@ -6,9 +6,9 @@
 
 #include "lexer.h"
 
-int is_name_char(char);
-int is_digit_char(char);
-int is_hex_char(char);
+static int is_name_char(char);
+static int is_digit_char(char);
+static int is_hex_char(char);
 
 token_t * read_token(lexer_state * state)
 {
@@ -142,17 +142,17 @@ void lexer_init(lexer_state * state, char * source)
   state->ahead = 0;
 }
 
-int is_name_char(char c)
+static int is_name_char(char c)
 {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-int is_digit_char(char c)
+static int is_digit_char(char c)
 {
   return c >= '0' && c <= '9';
 }
 
-int is_hex_char(char c)
+static int is_hex_char(char c)
 {
   return is_digit_char(c) || (c >= 'A' && c <= 'F') || c == 'x';
 }

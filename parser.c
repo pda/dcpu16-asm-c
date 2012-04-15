@@ -10,13 +10,13 @@
 
 #include "parser.h"
 
-statement_t * parse_statement(lexer_state *);
-void parse_discard_empty_lines(lexer_state *);
-void parse_label(lexer_state *, statement_t *);
-void parse_mnemonic(lexer_state *, statement_t *);
-void parse_operands(lexer_state *, statement_t *);
-void parse_operand(lexer_state *, statement_t *, int index);
-uint8_t parser_opcode_for_mnemonic(char *);
+static statement_t * parse_statement(lexer_state *);
+static void parse_discard_empty_lines(lexer_state *);
+static void parse_label(lexer_state *, statement_t *);
+static void parse_mnemonic(lexer_state *, statement_t *);
+static void parse_operands(lexer_state *, statement_t *);
+static void parse_operand(lexer_state *, statement_t *, int index);
+static uint8_t parser_opcode_for_mnemonic(char *);
 
 void parse(char * source)
 {
@@ -32,7 +32,7 @@ void parse(char * source)
   }
 }
 
-statement_t * parse_statement(lexer_state * state)
+static statement_t * parse_statement(lexer_state * state)
 {
   token_t * t;
   statement_t * s = statement_new();
@@ -58,14 +58,14 @@ statement_t * parse_statement(lexer_state * state)
   return s;
 }
 
-void parse_discard_empty_lines(lexer_state * state)
+static void parse_discard_empty_lines(lexer_state * state)
 {
   token_t * t;
   while ((t = peek_token(state, 1)) && (t->type == T_COMMENT || t->type == T_NEWLINE))
     next_token(state);
 }
 
-void parse_label(lexer_state * state, statement_t * s)
+static void parse_label(lexer_state * state, statement_t * s)
 {
   token_t * t = next_token(state);
   s->label = (char *)malloc(t->size);
@@ -73,7 +73,7 @@ void parse_label(lexer_state * state, statement_t * s)
   memcpy(s->label, t->value, t->size);
 }
 
-void parse_mnemonic(lexer_state * state, statement_t * s)
+static void parse_mnemonic(lexer_state * state, statement_t * s)
 {
   token_t * t = next_token(state);
   if (t->type != T_NAME) { print_token(t); CRASH("expected T_NAME"); }
@@ -81,14 +81,14 @@ void parse_mnemonic(lexer_state * state, statement_t * s)
   s->opcode = parser_opcode_for_mnemonic(s->mnemonic);
 }
 
-void parse_operands(lexer_state * state, statement_t * s)
+static void parse_operands(lexer_state * state, statement_t * s)
 {
   parse_operand(state, s, 0);
   if (next_token(state)->type == T_COMMA)
     parse_operand(state, s, 1);
 }
 
-void parse_operand(lexer_state * state, statement_t * s, int index)
+static void parse_operand(lexer_state * state, statement_t * s, int index)
 {
   token_t * t;
   t = next_token(state);
@@ -115,7 +115,7 @@ void parse_operand(lexer_state * state, statement_t * s, int index)
   }
 }
 
-uint8_t parser_opcode_for_mnemonic(char * m)
+static uint8_t parser_opcode_for_mnemonic(char * m)
 {
   // basic opcodes
   if (strcmp(m, "SET") == 0) return 0x1;
