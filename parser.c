@@ -1,31 +1,22 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 
 #include "lexer.h"
+#include "statement.h"
 #include "token.h"
 #include "utils.h"
 
 #include "parser.h"
 
-typedef struct {
-  char * label;
-  char mnemonic[4];
-  uint8_t opcode;
-  char * operand[2];
-} statement_t;
-
 statement_t * parse_statement(lexer_state *);
-statement_t * statement_new();
-void statement_free(statement_t *);
 void parse_discard_empty_lines(lexer_state *);
 void parse_label(lexer_state *, statement_t *);
 void parse_mnemonic(lexer_state *, statement_t *);
 void parse_operands(lexer_state *, statement_t *);
 void parse_operand(lexer_state *, statement_t *, int index);
 uint8_t parser_opcode_for_mnemonic(char *);
-void print_statement(statement_t *);
 
 void parse(char * source)
 {
@@ -65,27 +56,6 @@ statement_t * parse_statement(lexer_state * state)
     CRASH("expected T_NEWLINE");
 
   return s;
-}
-
-statement_t * statement_new()
-{
-  statement_t * s = (statement_t *)malloc(sizeof(statement_t));
-  if (!s) CRASH("malloc statement_t");
-
-  s->label = 0;
-  s->mnemonic[0] = 0;
-  s->operand[0] = 0;
-  s->operand[1] = 0;
-
-  return s;
-}
-
-void statement_free(statement_t * s)
-{
-  free(s->label);
-  free(s->operand[0]);
-  free(s->operand[1]);
-  free(s);
 }
 
 void parse_discard_empty_lines(lexer_state * state)
@@ -170,29 +140,4 @@ uint8_t parser_opcode_for_mnemonic(char * m)
 
   puts(m); CRASH("parser_opcode_for_mnemonic");
   return -1;
-}
-
-void print_statement(statement_t * s)
-{
-  const char * label = s->label ? s->label : "";
-  char o[2][32];
-  char * writer;
-
-  bzero(o[0], 32);
-  bzero(o[1], 32);
-
-  writer = stpncpy(o[0], s->operand[0], 30);
-  if (s->operand[1]) *(writer++) = ',';
-
-  if (s->operand[1])
-    stpncpy(o[1], s->operand[1], 31);
-
-  printf(
-    "%-16s %-3s  %-12s %-12s ; 0x%02X\n",
-    label,
-    s->mnemonic,
-    o[0],
-    o[1],
-    s->opcode
-  );
 }
