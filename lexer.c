@@ -154,5 +154,5 @@ int is_digit_char(char c)
 
 int is_hex_char(char c)
 {
-  return is_digit_char(c) || (c >= 'a' && c <= 'f') || c == 'x';
+  return is_digit_char(c) || (c >= 'A' && c <= 'F') || c == 'x';
 }
