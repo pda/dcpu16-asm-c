@@ -57,6 +57,12 @@ void operand_init(operand_t *);
 void operand_free(operand_t *);
 
 /**
+ * Sets the label of the operand to a copy of the string.
+ * Memory allocation is released by operand_free().
+ */
+void operand_set_label(operand_t *, char *, int length);
+
+/**
  * Return a string representation of the operand.
  * Must be released with free() by the caller.
  */

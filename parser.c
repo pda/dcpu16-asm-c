@@ -108,15 +108,9 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
     case T_NAME:
       o->type = operand_type_for_name(v);
       if (o->type == O_REG)
-      {
         operand_set_reg_by_name(o, t->value);
-      }
       else if (o->type == O_LITERAL)
-      {
-        o->label = (char *)malloc(strlen(v) + 1);
-        if (!o->label) CRASH("malloc o->label");
-        strcpy(o->label, v);
-      }
+        operand_set_label(o, t->value, t->size);
       break;
 
     case T_INT_HEX:

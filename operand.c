@@ -21,6 +21,14 @@ void operand_free(operand_t * o)
   free(o->label);
 }
 
+void operand_set_label(operand_t * o, char * label, int length)
+{
+  if (o->label) free(o->label);
+  o->label = (char *)malloc(length + 1);
+  if (!o->label) CRASH("malloc o->label");
+  strlcpy(o->label, label, length + 1);
+}
+
 char * operand_to_s(operand_t * o)
 {
   char * s = (char *)malloc(32);
