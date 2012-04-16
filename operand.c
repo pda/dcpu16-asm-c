@@ -40,14 +40,14 @@ char * operand_to_s(operand_t * o)
   else if (o->type == O_REG)
     snprintf(s, 32, "%c", "ABCXYZIJ"[o->reg]);
 
+  else if (o->type == O_NW && o->label)
+    snprintf(s, 32, "%s", o->label);
+
   else if (o->type == O_NW)
     snprintf(s, 32, "0x%04X", o->next_word);
 
   else if (o->type == O_INDIRECT_NW)
     snprintf(s, 32, "[0x%04X]", o->next_word);
-
-  else if (o->type == O_LITERAL && o->label)
-    snprintf(s, 32, "%s", o->label);
 
   else if (o->type == O_INDIRECT_REG)
     snprintf(s, 32, "[%c]", "ABCXYZIJ"[o->reg]);

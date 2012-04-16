@@ -18,7 +18,7 @@ static void parse_mnemonic(lexer_state *, statement_t *);
 static void parse_operands(lexer_state *, statement_t *);
 static void parse_operand(lexer_state *, statement_t *, int index);
 static void parse_operand_indirect(lexer_state *, operand_t *);
-static uint8_t parser_opcode_for_mnemonic(char *);
+static void parse_opcode_for_mnemonic(statement_t *);
 static enum operand_type operand_type_for_name(const char *);
 
 parse_result_t * parse(char * source)
@@ -93,8 +93,8 @@ static void parse_mnemonic(lexer_state * state, statement_t * s)
 {
   token_t * t = next_token(state);
   if (t->type != T_NAME) { print_token(t); CRASH("expected T_NAME"); }
-  memcpy(s->mnemonic, t->value, 4);
-  s->opcode = parser_opcode_for_mnemonic(s->mnemonic);
+  strlcpy(s->mnemonic, t->value, 4);
+  parse_opcode_for_mnemonic(s);
 }
 
 static void parse_operands(lexer_state * state, statement_t * s)
@@ -122,8 +122,12 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
       o->type = operand_type_for_name(v);
       if (o->type == O_REG)
         operand_set_reg_by_name(o, t->value);
-      else if (o->type == O_LITERAL)
+      else if (o->type == O_NW)
+      {
         operand_set_label(o, t->value, t->size);
+        o->next_word = 0x1AB1; // label placeholder for now.
+      }
+
       break;
 
     case T_INT_HEX:
@@ -182,31 +186,39 @@ static void parse_operand_indirect(lexer_state * state, operand_t * o)
   }
 }
 
-static uint8_t parser_opcode_for_mnemonic(char * m)
+// TODO: move somewhere else?
+static void parse_opcode_for_mnemonic(statement_t * s)
 {
+  char * m = s->mnemonic;
+
   // basic opcodes
-  if (strcmp(m, "SET") == 0) return 0x1;
-  if (strcmp(m, "ADD") == 0) return 0x2;
-  if (strcmp(m, "SUB") == 0) return 0x3;
-  if (strcmp(m, "MUL") == 0) return 0x4;
-  if (strcmp(m, "DIV") == 0) return 0x5;
-  if (strcmp(m, "MOD") == 0) return 0x6;
-  if (strcmp(m, "SHL") == 0) return 0x7;
-  if (strcmp(m, "SHR") == 0) return 0x8;
-  if (strcmp(m, "AND") == 0) return 0x9;
-  if (strcmp(m, "BOR") == 0) return 0xA;
-  if (strcmp(m, "XOR") == 0) return 0xB;
-  if (strcmp(m, "IFE") == 0) return 0xC;
-  if (strcmp(m, "IFN") == 0) return 0xD;
-  if (strcmp(m, "IFG") == 0) return 0xE;
-  if (strcmp(m, "IFB") == 0) return 0xF;
-  if (strcmp(m, "IFB") == 0) return 0xF;
+  if (strcmp(m, "SET") == 0) s->opcode = OP_SET;
+  else if (strcmp(m, "ADD") == 0) s->opcode = OP_ADD;
+  else if (strcmp(m, "SUB") == 0) s->opcode = OP_SUB;
+  else if (strcmp(m, "MUL") == 0) s->opcode = OP_MUL;
+  else if (strcmp(m, "DIV") == 0) s->opcode = OP_DIV;
+  else if (strcmp(m, "MOD") == 0) s->opcode = OP_MOD;
+  else if (strcmp(m, "SHL") == 0) s->opcode = OP_SHL;
+  else if (strcmp(m, "SHR") == 0) s->opcode = OP_SHR;
+  else if (strcmp(m, "AND") == 0) s->opcode = OP_AND;
+  else if (strcmp(m, "BOR") == 0) s->opcode = OP_BOR;
+  else if (strcmp(m, "XOR") == 0) s->opcode = OP_XOR;
+  else if (strcmp(m, "IFE") == 0) s->opcode = OP_IFE;
+  else if (strcmp(m, "IFN") == 0) s->opcode = OP_IFN;
+  else if (strcmp(m, "IFG") == 0) s->opcode = OP_IFG;
+  else if (strcmp(m, "IFB") == 0) s->opcode = OP_IFB;
 
   // non-basic opcodes
-  if (strcmp(m, "JSR") == 0) return 0x10;
-
-  puts(m); CRASH("parser_opcode_for_mnemonic");
-  return -1;
+  else if (strcmp(m, "JSR") == 0)
+  {
+    s->opcode = 0x0;
+    s->opcode_non_basic = OP_JSR;
+  }
+  else
+  {
+    puts(s->mnemonic);
+    CRASH("parser_opcode_for_mnemonic");
+  }
 }
 
 static enum operand_type operand_type_for_name(const char * n)
@@ -231,5 +243,5 @@ static enum operand_type operand_type_for_name(const char * n)
   if (strcmp(n, "PUSH") == 0) return O_PUSH;
 
   // label
-  return O_LITERAL;
+  return O_NW;
 }
