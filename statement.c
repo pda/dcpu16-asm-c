@@ -7,25 +7,20 @@
 #include "statement.h"
 #include "operand.h"
 
-statement_t * statement_new()
+void statement_init(statement_t * s)
 {
-  statement_t * s = (statement_t *)malloc(sizeof(statement_t));
-  if (!s) CRASH("malloc statement_t");
-
   s->label = 0;
   s->mnemonic[0] = 0;
+  s->opcode = 0;
   operand_init(&s->operand[0]);
   operand_init(&s->operand[1]);
-
-  return s;
 }
 
-void statement_free(statement_t * s)
+void statement_free_members(statement_t * s)
 {
   free(s->label);
   operand_free(&s->operand[0]);
   operand_free(&s->operand[1]);
-  free(s);
 }
 
 void print_statement(statement_t * s)

@@ -13,14 +13,14 @@ typedef struct {
 } statement_t;
 
 /**
- * Allocate and initialize a statement_t.
+ * Initialize an already allocated statement_t.
  */
-statement_t * statement_new();
+void statement_init(statement_t *);
 
 /**
  * Free memory for statement_t and its members.
  */
-void statement_free(statement_t *);
+void statement_free_members(statement_t *);
 
 /**
  * Dump a representation of the statement.

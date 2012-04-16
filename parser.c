@@ -11,7 +11,7 @@
 
 #include "parser.h"
 
-static statement_t * parse_statement(lexer_state *);
+static int parse_statement(lexer_state *, statement_t *);
 static void parse_discard_empty_lines(lexer_state *);
 static void parse_label(lexer_state *, statement_t *);
 static void parse_mnemonic(lexer_state *, statement_t *);
@@ -21,24 +21,37 @@ static void parse_operand_indirect(lexer_state *, operand_t *);
 static uint8_t parser_opcode_for_mnemonic(char *);
 static enum operand_type operand_type_for_name(const char *);
 
-void parse(char * source)
+parse_result_t * parse(char * source)
 {
+  int statement_count;
+  parse_result_t * pr = (parse_result_t *)malloc(sizeof(parse_result_t));
+
   lexer_state state;
   lexer_init(&state, source);
 
-  statement_t * s;
+  // statement storage
+  statement_t * statement_writer =
+    (statement_t *)malloc(sizeof(statement_t) * PR_STATEMENTS_LIMIT);
 
-  while ((s = parse_statement(&state)))
-  {
-    print_statement(s);
-    statement_free(s);
-  }
+  statement_t ** pointer_writer = pr->statements;
+  while (parse_statement(&state, statement_writer))
+    *(pointer_writer++) = statement_writer++;
+
+  *(pointer_writer) = 0; // null terminate statement list.
+
+  return pr;
 }
 
-static statement_t * parse_statement(lexer_state * state)
+void free_parse_result(parse_result_t * pr)
+{
+  free(pr->statements);
+  free(pr);
+}
+
+static int parse_statement(lexer_state * state, statement_t * s)
 {
   token_t * t;
-  statement_t * s = statement_new();
+  statement_init(s);
 
   parse_discard_empty_lines(state);
 
@@ -58,7 +71,7 @@ static statement_t * parse_statement(lexer_state * state)
   if (next_token(state)->type != T_NEWLINE)
     CRASH("expected T_NEWLINE");
 
-  return s;
+  return 1;
 }
 
 static void parse_discard_empty_lines(lexer_state * state)
