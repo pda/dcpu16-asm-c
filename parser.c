@@ -122,18 +122,7 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
               t = next_token(state);
               if (t->type != T_NAME) CRASH("expected T_NAME");
               o->type = O_INDIRECT_NW_OFFSET;
-              switch (*t->value)
-              {
-                case 'A': o->reg = REG_A; break;
-                case 'B': o->reg = REG_B; break;
-                case 'C': o->reg = REG_C; break;
-                case 'X': o->reg = REG_X; break;
-                case 'Y': o->reg = REG_Y; break;
-                case 'Z': o->reg = REG_Z; break;
-                case 'I': o->reg = REG_I; break;
-                case 'J': o->reg = REG_J; break;
-                default: CRASH("Invalid register."); break;
-              }
+              operand_set_reg_by_name(o, t->value);
               if (next_token(state)->type != T_BRACKET_R)
                 CRASH("expected T_BRACKET_R");
               break;
@@ -150,20 +139,9 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
       o->type = operand_type_for_name(v);
       if (o->type == O_REG)
       {
-        switch (*v)
-        {
-          case 'A': o->reg = REG_A; break;
-          case 'B': o->reg = REG_B; break;
-          case 'C': o->reg = REG_C; break;
-          case 'X': o->reg = REG_X; break;
-          case 'Y': o->reg = REG_Y; break;
-          case 'Z': o->reg = REG_Z; break;
-          case 'I': o->reg = REG_I; break;
-          case 'J': o->reg = REG_J; break;
-          default: CRASH("Invalid register."); break;
-        }
+        operand_set_reg_by_name(o, t->value);
       }
-      if (o->type == O_LITERAL)
+      else if (o->type == O_LITERAL)
       {
         o->label = (char *)malloc(strlen(v) + 1);
         if (!o->label) CRASH("malloc o->label");

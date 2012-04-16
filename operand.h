@@ -62,4 +62,9 @@ void operand_free(operand_t *);
  */
 char * operand_to_s(operand_t *);
 
+/**
+ * Sets the register (as enum operand_register_value) for the register name.
+ */
+void operand_set_reg_by_name(operand_t *, char *);
+
 #endif

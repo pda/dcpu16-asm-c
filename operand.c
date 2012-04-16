@@ -79,3 +79,19 @@ static const char * operand_type_name(operand_t * o)
   CRASH("Invalid type for operand_type_name");
   return (char *)0;
 }
+
+void operand_set_reg_by_name(operand_t * o, char * name)
+{
+  switch (*name)
+  {
+    case 'A': o->reg = REG_A; break;
+    case 'B': o->reg = REG_B; break;
+    case 'C': o->reg = REG_C; break;
+    case 'X': o->reg = REG_X; break;
+    case 'Y': o->reg = REG_Y; break;
+    case 'Z': o->reg = REG_Z; break;
+    case 'I': o->reg = REG_I; break;
+    case 'J': o->reg = REG_J; break;
+    default: CRASH("Invalid register."); break;
+  }
+}
