@@ -17,6 +17,7 @@ static void parse_label(lexer_state *, statement_t *);
 static void parse_mnemonic(lexer_state *, statement_t *);
 static void parse_operands(lexer_state *, statement_t *);
 static void parse_operand(lexer_state *, statement_t *, int index);
+static void parse_operand_indirect(lexer_state *, operand_t *);
 static uint8_t parser_opcode_for_mnemonic(char *);
 static enum operand_type operand_type_for_name(const char *);
 
@@ -101,40 +102,9 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
   switch (t->type)
   {
     case T_BRACKET_L:
-      t = next_token(state);
-      switch (t->type)
-      {
-        case T_NAME:
-          // TODO: assuming register; could this be a label?
-          if (next_token(state)->type != T_BRACKET_R)
-            CRASH("expected T_BRACKET_R");
-          o->type = O_INDIRECT_REG;
-          break;
-        case T_INT_HEX:
-          o->next_word = (uint16_t)strtoul(t->value, 0, 16);
-          t = next_token(state);
-          switch (t->type)
-          {
-            case T_BRACKET_R:
-              o->type = O_INDIRECT_NW;
-              break;
-            case T_PLUS:
-              t = next_token(state);
-              if (t->type != T_NAME) CRASH("expected T_NAME");
-              o->type = O_INDIRECT_NW_OFFSET;
-              operand_set_reg_by_name(o, t->value);
-              if (next_token(state)->type != T_BRACKET_R)
-                CRASH("expected T_BRACKET_R");
-              break;
-            default:
-              CRASH("expected T_BRACKET_R or T_PLUS");
-              break;
-          }
-          break;
-        default:
-          CRASH("default");
-      }
+      parse_operand_indirect(state, o);
       break;
+
     case T_NAME:
       o->type = operand_type_for_name(v);
       if (o->type == O_REG)
@@ -148,18 +118,60 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
         strcpy(o->label, v);
       }
       break;
+
     case T_INT_HEX:
       o->type = O_NW;
       o->next_word = (uint16_t)strtoul(t->value, 0, 16);
       break;
+
     case T_INT_DEC:
       o->type = O_NW;
       o->next_word = (uint16_t)strtoul(t->value, 0, 10);
       break;
+
     default:
       print_token(t);
       CRASH("parse_operand");
       break;
+  }
+}
+
+static void parse_operand_indirect(lexer_state * state, operand_t * o)
+{
+  token_t * t = next_token(state);
+  switch (t->type)
+  {
+    case T_NAME:
+      // TODO: assuming register; could this be a label?
+      if (next_token(state)->type != T_BRACKET_R)
+        CRASH("expected T_BRACKET_R");
+      o->type = O_INDIRECT_REG;
+      break;
+
+    case T_INT_HEX:
+      o->next_word = (uint16_t)strtoul(t->value, 0, 16);
+      t = next_token(state);
+      switch (t->type)
+      {
+        case T_BRACKET_R:
+          o->type = O_INDIRECT_NW;
+          break;
+        case T_PLUS:
+          t = next_token(state);
+          if (t->type != T_NAME) CRASH("expected T_NAME");
+          o->type = O_INDIRECT_NW_OFFSET;
+          operand_set_reg_by_name(o, t->value);
+          if (next_token(state)->type != T_BRACKET_R)
+            CRASH("expected T_BRACKET_R");
+          break;
+        default:
+          CRASH("expected T_BRACKET_R or T_PLUS");
+          break;
+      }
+      break;
+
+    default:
+      CRASH("default");
   }
 }
 
