@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 
+#include "assembler.h"
 #include "file.h"
 #include "parser.h"
 
@@ -16,6 +18,15 @@ int main(int argc, const char ** argv)
 
   for (int i = 0; i < pr->statement_count; i++)
     print_statement(&pr->statements[i]);
+
+  program_t * program = assemble(pr);
+  printf("\nProgram:");
+  for (int i = 0; i < program->length; i++)
+  {
+    if (i % 4 == 0) printf("\n%04x:", i);
+    printf(" %04x", *(program->code + i));
+  }
+  printf("\n");
 
   exit(EXIT_SUCCESS);
 }
