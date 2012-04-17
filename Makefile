@@ -10,4 +10,4 @@ clean:
 	rm -f *.o(.N) main
 
 test: main
-	$(SHELL) -c 'colordiff -ub fixtures/expected.stdout <(./main)'
+	$(SHELL) -c 'colordiff -u fixtures/expected.stdout <(./main)'
