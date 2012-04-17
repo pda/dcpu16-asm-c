@@ -1,6 +1,133 @@
-Experimental assembly lexer in C.
-=================================
+================================================================================
+ DCPU-16 assembler  //
+___________________//
 
-Blindly working towards a minimal way of parsing assembly language as per:
+An assembler for DCPU-16 as specified at:
 http://0x10c.com/doc/dcpu-16.txt
-... without using regular expressions or parser generators.
+
+All components (lexer, parser, assembler) are hand written in C;
+there are no dependencies, external libraries, regular expressions etc.
+
+
+--------------------------------------------------------------------------------
+ Status  /
+________/
+
+Parses and assembles the 17-instruction sample assembly code provided at
+http://0x10c.com/doc/dcpu-16.txt and included in fixtures/sample.s
+
+Outputs the machine code as hexadecimal, in the same format used for the "Full
+memory dump" provided with the sample code:
+ 
+    0000: 7c01 0030 7de1 1000 0020 7803 1000 c00d
+    0008: 7dc1 001a a861 7c01 2000 2161 2000 8463
+    0010: 806d 7dc1 000d 9031 7c10 0018 7dc1 001a
+    0018: 9037 61c1 7dc1 001a
+
+TODO:
+* Accept source filename in argv.
+* Output binary program, instead of just printing it in hexadecimal.
+* Eliminate static limits; statements and instructions.
+* Audit for memory leaks.
+* Release memory used by tokens in the lexer.
+* Implement additional assembly features not demonstrated in the sample code.
+* Accept source code from stdin?
+* Track filename / line numbers through tokenizer and parser.
+* Better error handling, less CRASH() macro.
+
+
+--------------------------------------------------------------------------------
+ Components  /
+____________/
+
+Lexer
+-----
+
+The lexer reads the assembly source code, and emits tokens representing
+syntactic components, e.g. T_LABEL or T_INT_HEX. The next token can be
+requested, and a limited number of upcoming tokens can be peeked at in advance.
+
+See: {lexer,token}.{h,c}
+
+Parser
+------
+
+The parser requests tokens from the lexer, occasionally peeking ahead to make
+decisions. These are built into a list of statement objects, each representing
+an optional label, a basic opcode, optionally a non-basic opcode, and one or
+two operand. Each operand is an object which may represent a register, literal
+value, label, indirect memory access, etc.
+
+See: {parser,statement,operand}.{h,c}
+
+
+Assembler
+---------
+
+The assembler takes the statements returned by the parser, and packs them into
+their binary instruction representations. Each statement resolves to one, two
+or three 16-bit words. Literal values less than 0x100 are optimized into the
+first word of the instruction.
+
+Label forward-references, where a label is referenced before it has been
+declared, are written as null placeholders. After the program is written and
+all labels have been declared, these placeholders are amended to their resolved
+values.
+
+See: {assembler,label_table}.{h,c}
+
+
+--------------------------------------------------------------------------------
+ Code / Development  /
+____________________/
+
+This has been developed on:
+
+* Mac OS X Lion 10.7.3.
+
+* Apple clang version 3.1 (tags/Apple/clang-318.0.45) (based on LLVM 3.1svn)
+  Target: x86_64-apple-darwin11.3.0
+
+* iTerm2 + tmux + Vim!
+
+
+I'd like it to build on any sane system. It's currently targeting the C99
+standard, but I would consider porting it to ANSI C.
+
+Currently I'm using strlcpy() for safe size-bounded string copying.
+The Mac OS (BSD) man pages claim:
+
+     It is recommended that strlcpy(3) be used instead as a way to avoid such
+     pr oblems.  strlcpy(3) is not defined in any standards, but it has been
+     adopted by most major libc implementations.
+
+However I don't believe it's provided by gcc/glibc, so I'll need to do
+something about that.
+
+
+
+--------------------------------------------------------------------------------
+ License  /
+_________/
+
+MIT License
+
+Copyright (C) 2012 Paul Annesley
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
