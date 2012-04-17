@@ -40,11 +40,6 @@ typedef struct {
   operand_t operand[2];
 } statement_t;
 
-typedef struct {
-  int word_count;
-  uint16_t word[3];
-} instruction_t;
-
 /**
  * Initialize an already allocated statement_t.
  */
