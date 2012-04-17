@@ -1,10 +1,39 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
 
 #include "assembler.h"
 #include "utils.h"
 
+// TODO: dynamically grow program code allocation.
+#define PROGRAM_MAX_LENGTH 1024
+
 static void statement_assemble_operand(operand_t *, instruction_t *, int index);
+
+program_t * assemble(parse_result_t * pr)
+{
+  program_t * p = (program_t *)malloc(
+      sizeof(program_t) +
+      sizeof(uint16_t) * PROGRAM_MAX_LENGTH
+  );
+  if (!p) CRASH("malloc program_t");
+  p->code = (uint16_t *)(p + 1);
+  p->length = 0;
+
+  statement_t * s;
+  instruction_t instruction;
+  for (int i = 0; i < pr->statement_count; i++)
+  {
+    s = &pr->statements[i];
+    statement_assemble(s, &instruction);
+    for (int j = 0; j < instruction.word_count; j++)
+      *(p->code + p->length + j) = instruction.word[j];
+    p->length += instruction.word_count;
+  }
+
+  *(p->code + p->length) = 0;
+  return p;
+}
 
 void statement_assemble(statement_t * s, instruction_t * instruction)
 {
