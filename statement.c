@@ -34,7 +34,8 @@ void print_statement(statement_t * s)
     o[i] = operand_to_s(&s->operand[i]);
 
   printf(
-    "%-10s %-3s %-10s %s\n",
+    "%s%-9s %-3s %-10s %s\n",
+    s->label ? ":" : " ",
     label,
     s->mnemonic,
     o[0],

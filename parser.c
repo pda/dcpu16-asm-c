@@ -80,7 +80,7 @@ static void parse_label(lexer_state * state, statement_t * s)
   token_t * t = next_token(state);
   s->label = (char *)malloc(t->size);
   if (!s->label) CRASH("malloc label");
-  memcpy(s->label, t->value, t->size);
+  strlcpy(s->label, t->value + 1, t->size);
 }
 
 static void parse_mnemonic(lexer_state * state, statement_t * s)
