@@ -23,7 +23,7 @@ int main(int argc, const char ** argv)
   printf("\nProgram:");
   for (int i = 0; i < program->length; i++)
   {
-    if (i % 4 == 0) printf("\n%04x:", i);
+    if (i % 8 == 0) printf("\n%04x:", i);
     printf(" %04x", *(program->code + i));
   }
   printf("\n");
