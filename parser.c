@@ -119,7 +119,7 @@ static void parse_operand(lexer_state * state, statement_t * s, int index)
       else if (o->type == O_NW)
       {
         operand_set_label(o, t->value, t->size);
-        o->next_word = 0x1AB1; // label placeholder for now.
+        o->next_word = 0; // label placeholder
       }
 
       break;
