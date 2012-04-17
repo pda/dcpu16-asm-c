@@ -33,21 +33,13 @@ void print_statement(statement_t * s)
   for (int i = 0; i < 2; i++)
     o[i] = operand_to_s(&s->operand[i]);
 
-  instruction_t instruction;
-  statement_assemble(s, &instruction);
-
   printf(
-    "%-10s %-3s %-10s %-10s ;",
+    "%-10s %-3s %-10s %s\n",
     label,
     s->mnemonic,
     o[0],
     o[1]
   );
-
-  for (int i = 0; i < instruction.word_count; i++)
-    printf(" %04x", instruction.word[i]);
-
-  printf("\n");
 
   for (int i = 0; i < 2; i++)
     free(o[i]);
