@@ -29,15 +29,9 @@ parse_result_t * parse(char * source)
   lexer_state state;
   lexer_init(&state, source);
 
-  // statement storage
-  statement_t * statement_writer =
-    (statement_t *)malloc(sizeof(statement_t) * PR_STATEMENTS_LIMIT);
-
-  statement_t ** pointer_writer = pr->statements;
-  while (parse_statement(&state, statement_writer))
-    *(pointer_writer++) = statement_writer++;
-
-  *(pointer_writer) = 0; // null terminate statement list.
+  statement_t * s = pr->statements;
+  while (parse_statement(&state, s++))
+    pr->statement_count++;
 
   return pr;
 }

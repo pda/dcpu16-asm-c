@@ -9,16 +9,13 @@ int main(int argc, const char ** argv)
 {
   char * source;
   parse_result_t * pr;
-  statement_t * s;
-  statement_t ** sp_reader;
 
   source = load_file(SOURCE_PATH);
   pr = parse(source);
   free(source);
 
-  sp_reader = pr->statements;
-  while ((s = *sp_reader++))
-    print_statement(s);
+  for (int i = 0; i < pr->statement_count; i++)
+    print_statement(&pr->statements[i]);
 
   exit(EXIT_SUCCESS);
 }

@@ -7,7 +7,7 @@
 #define PR_STATEMENTS_LIMIT 64
 
 typedef struct {
-  statement_t * statements[PR_STATEMENTS_LIMIT];
+  statement_t statements[PR_STATEMENTS_LIMIT];
   int statement_count;
 } parse_result_t;
 
