@@ -34,4 +34,9 @@ void label_write(label_table_t *, char *, uint16_t);
  */
 uint16_t label_lookup_write(label_table_t *, label_table_t *, char *, uint16_t);
 
+/**
+ * Print the contents of the table to stdout.
+ */
+void label_table_print(label_table_t *);
+
 #endif

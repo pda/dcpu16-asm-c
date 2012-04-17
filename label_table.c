@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "label_table.h"
 #include "string.h"
 
@@ -36,4 +38,10 @@ uint16_t label_lookup_write(
 
   label_write(to, label, address);
   return 0;
+}
+
+void label_table_print(label_table_t * t)
+{
+  for (int i = 0; i < t->length; i++)
+    printf("  :%s => 0x%04x\n", t->label[i], t->address[i]);
 }
